@@ -4,7 +4,6 @@ require("dotenv").config();
 const fs = require("fs");
 const privateKey = process.env.PRIVATE_KEY;
 const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
-// const projectId = "E535Y3ehsgg9w7EuyjR9FKxPZ7d0HzQa"
 const projectId = process.env.PROJECT_ID;
 
 module.exports = {
