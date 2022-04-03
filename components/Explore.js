@@ -79,8 +79,7 @@ function Explore() {
             <div className="row">
               <div className="col-md-12 text-center">
                 <h1 className="banner-text">
-                  A zero collateral rental platform to lend and Borrow Game NFT
-                  Assets!
+                  Platform for the next generation Games and Gamers
                 </h1>
                 <p
                   className="text-white text-center"
