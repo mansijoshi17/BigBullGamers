@@ -24,10 +24,6 @@ contract NFTMarket is ReentrancyGuard {
         uint256 tokenId;
         address payable seller;
         address payable owner;
-        uint256 onemonthPrice;
-        uint256 threemonthPrice;
-        uint256 sixmonthPrice;
-        uint256 twelvemonthPrice;
     }
 
     mapping(uint256 => MarketItem) private idToMarketItem;
@@ -37,11 +33,7 @@ contract NFTMarket is ReentrancyGuard {
         address indexed nftContract,
         uint256 indexed tokenId,
         address seller,
-        address owner,
-        uint256 onemonthPrice,
-        uint256 threemonthPrice,
-        uint256 sixmonthPrice,
-        uint256 twelvemonthPrice
+        address owner
     );
 
     function getMarketItem(uint256 marketItemId)
@@ -54,11 +46,7 @@ contract NFTMarket is ReentrancyGuard {
 
     function createMarketItem(
         address nftContract,
-        uint256 tokenId,
-        uint256 onemonthPrice,
-        uint256 threemonthPrice,
-        uint256 sixmonthPrice,
-        uint256 twelvemonthPrice
+        uint256 tokenId
     ) public nonReentrant {
         _itemIds.increment();
         uint256 itemId = _itemIds.current();
@@ -68,11 +56,7 @@ contract NFTMarket is ReentrancyGuard {
             nftContract,
             tokenId,
             payable(msg.sender),
-            payable(address(0)),
-            onemonthPrice,
-            threemonthPrice,
-            sixmonthPrice,
-            twelvemonthPrice
+            payable(address(0))
         );
 
         emit MarketItemCreated(
@@ -80,11 +64,7 @@ contract NFTMarket is ReentrancyGuard {
             nftContract,
             tokenId,
             msg.sender,
-            address(0),
-            onemonthPrice,
-            threemonthPrice,
-            sixmonthPrice,
-            twelvemonthPrice
+            address(0)
         );
     }
 

@@ -1,6 +1,7 @@
-export const nftaddress = "0x2304B398cC796B1b65529D651363C6a4f80C3467";
-export const nftmarketaddress = "0xFf66ff6E25445B938688d14DDc91f4dD4B1DAc75";
-export const rentFactoryAddress = "0x4C1329326313F38455A4CE6ffD47061bbe781215";
+export const nftaddress = "0x0BD8feBe59927F3805d379d18A52A0002EfB98FB";
+export const nftmarketaddress = "0x743B9CE07222797778fc4156bD4364b44100Ca22";
+export const rentFactoryAddress = "0x0572e71cE38FACF55EE1A0CcDaa2F645ca4689Bc";
+export const chainLinkPriceFeed = "0x149a76dD044b3C77fd2A8a193647Fd735Bcb4a0c";
 
 // export const ropstenAddress="0x39c3264b18d0935F617Ef3dEE7544d03B4C27C09";
 // export const ropstenMarketAddress="0x2095e6c4D4Ac61a909C5c61CaC23Fd1F37b9C884";

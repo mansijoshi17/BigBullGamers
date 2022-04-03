@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { faHeart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,11 +16,13 @@ import {
   ropstenMarketAddress,
   bscAddress,
   bscMarketAddress,
+  chainLinkPriceFeed,
 } from "../config";
 import NFT from "../artifacts/contracts/NFT.sol/NFT.json";
 import Market from "../artifacts/contracts/NFTMarket.sol/NFTMarket.json";
 import RentFactory from "../artifacts/contracts/RentFactory.sol/RentFactory.json";
 import Rent from "../artifacts/contracts/Rent.sol/Rent.json";
+import chainlinkABI from "../abi/ChainlinkPriceFeed.json";
 import web3 from "web3";
 import { ToastContainer, toast } from "react-toastify";
 import { Avatar, Fab } from "@material-ui/core";
@@ -71,10 +73,13 @@ function Create() {
     threemonthPrice: "",
     sixmonthPrice: "",
     twelvemonthPrice: "",
+    uploaded: "false",
   });
   const router = useRouter();
   const [loader, setLoader] = useState(false);
   const [selectedCategory, setCategory] = useState("");
+  const [usdValue, setUsdValue] = useState();
+  const [priceFeedCon, setPriceFeedCon] = useState();
 
   const web3Context = React.useContext(Web3Context);
   const { currentAddress, userData, userId } = web3Context;
@@ -102,6 +107,7 @@ function Create() {
     threemonthPrice,
     sixmonthPrice,
     twelvemonthPrice,
+    uploaded,
   } = formInput;
 
   const categoryOption = [
@@ -118,6 +124,30 @@ function Create() {
       subCategory: ["A1", "A2", "A3", "A4"],
     },
   ];
+
+  useEffect(() => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    const priceFeed = new ethers.Contract(
+      chainLinkPriceFeed,
+      chainlinkABI,
+      signer
+    );
+    setPriceFeedCon(priceFeed);
+  }, []);
+
+  useEffect(() => {
+    if (priceFeedCon !== undefined) {
+      getPrice();
+    }
+  }, [priceFeedCon]);
+
+  async function getPrice() {
+    let [price, decimals] = await priceFeedCon.getLatestPriceForMatic();
+    price = Number(price / Math.pow(10, decimals)).toFixed(2);
+    setUsdValue(price);
+  }
 
   async function onChange(e) {
     const file = e.target.files[0];
@@ -195,6 +225,7 @@ function Create() {
       threemonthPrice,
       sixmonthPrice,
       twelvemonthPrice,
+      uploaded,
     });
     try {
       const added = await client.add(data);
@@ -256,16 +287,7 @@ function Create() {
     let tokenId = value.toNumber();
 
     let contract = new ethers.Contract(chainMarketAddress, Market.abi, signer);
-    console.log(onemonthPrice);
-    console.log(ethers.utils.formatEther(onemonthPrice.toString()));
-    // transaction = await contract.createMarketItem(
-    //   chainAddress,
-    //   tokenId,
-    //   ethers.utils.parseEther(onemonthPrice.toString()),
-    //   ethers.utils.parseEther(threemonthPrice.toString()),
-    //   ethers.utils.parseEther(sixmonthPrice.toString()),
-    //   ethers.utils.parseEther(twelvemonthPrice.toString())
-    // );
+    transaction = await contract.createMarketItem(chainAddress, tokenId);
     var rentingAmount;
     var rentCont;
     if (onRent == "true") {
@@ -283,8 +305,8 @@ function Create() {
         currentAddress,
         parseInt(rentingAmount),
         chainAddress,
-        "Wrapped LoavelyNft",
-        "WLNT",
+        "Wrapped BigBull",
+        "WBBN",
         tokenId,
         startTime.getTime() / 1000,
         expiryTime.getTime() / 1000
@@ -324,6 +346,7 @@ function Create() {
       sixmonthPrice: onRent == "false" ? sixmonthPrice : "",
       twelvemonthPrice: onRent == "false" ? twelvemonthPrice : "",
       createdAt: Timestamp.fromDate(new Date()).toDate(),
+      uploaded,
     });
 
     await transaction.wait();
@@ -608,7 +631,7 @@ function Create() {
                             onChange={(e) =>
                               updateFormInput({
                                 ...formInput,
-                                threemonthPrice: e.target.value,
+                                sixmonthPrice: e.target.value,
                               })
                             }
                             className="form-control"
@@ -686,9 +709,12 @@ function Create() {
                             rentingPrice: e.target.value,
                           })
                         }
-                        className="form-control"
+                        className="form-control rentPrice"
                         placeholder={`enter renting price for one item (${formInput.token})`}
                       />
+                      <small id="emailHelp" class="form-text text-muted">
+                        1 MATIC = {usdValue} USD
+                      </small>
                       <div className="spacer-10" />
                       <h5>Interest Rate</h5>
                       <input

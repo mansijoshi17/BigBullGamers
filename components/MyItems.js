@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Web3Context } from "../context/Web3Context";
 import { Avatar, Fab } from "@material-ui/core";
 import { useRouter } from "next/router";
@@ -9,6 +9,10 @@ import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import web3 from "web3";
+import { ethers } from "ethers";
+import { SuperfluidWeb3Context } from "../context/SuperfluidContext";
+
+const ANIMATION_MINIMUM_STEP_TIME = 80;
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -38,6 +42,8 @@ function a11yProps(index) {
 }
 
 function MyItems() {
+  const supweb3Context = React.useContext(SuperfluidWeb3Context);
+  const { listOutFlows, flow } = supweb3Context;
   const router = useRouter();
   const web3Context = React.useContext(Web3Context);
   const {
@@ -56,6 +62,12 @@ function MyItems() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [value, setValue] = React.useState(0);
+  const [weiValue, setWeiValue] = useState(flow?.streamedUntilUpdatedAt);
+
+  const balanceTimestampMs = useMemo(
+    () => flow && ethers.BigNumber.from(flow?.updatedAtTimestamp).mul(1000),
+    [flow]
+  );
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -63,6 +75,7 @@ function MyItems() {
 
   useEffect(() => {
     console.log(currentAddress, "address");
+    listOutFlows();
 
     // window.ethereum.enable().then(function (accounts) {
     //   setCurrentAddress(accounts[0]);
@@ -89,6 +102,57 @@ function MyItems() {
     }
     setIsRefreshing(false);
   }, [userData, currentAddress]);
+
+  useEffect(() => {
+    if (flow !== undefined) {
+      const flowRateBigNumber =
+        flow && ethers.BigNumber.from(flow?.currentFlowRate);
+      if (flowRateBigNumber && flowRateBigNumber.isZero()) {
+        return; // No need to show animation when flow rate is zero.
+      }
+
+      const balanceBigNumber = ethers.BigNumber.from(
+        flow && flow?.streamedUntilUpdatedAt
+      );
+
+      let stopAnimation = false;
+      let lastAnimationTimestamp = 0;
+
+      const animationStep = (currentAnimationTimestamp) => {
+        if (stopAnimation) {
+          return;
+        }
+
+        if (
+          currentAnimationTimestamp - lastAnimationTimestamp >
+          ANIMATION_MINIMUM_STEP_TIME
+        ) {
+          const currentTimestampBigNumber = ethers.BigNumber.from(
+            new Date().valueOf() // Milliseconds elapsed since UTC epoch, disregards timezone.
+          );
+
+          setWeiValue(
+            balanceBigNumber.add(
+              currentTimestampBigNumber
+                .sub(balanceTimestampMs)
+                .mul(flowRateBigNumber)
+                .div(1000)
+            )
+          );
+
+          lastAnimationTimestamp = currentAnimationTimestamp;
+        }
+
+        window.requestAnimationFrame(animationStep);
+      };
+
+      window.requestAnimationFrame(animationStep);
+
+      return () => {
+        stopAnimation = true;
+      };
+    }
+  }, [flow]);
 
   const refreshData = () => {
     router.replace(router.asPath);
@@ -180,10 +244,23 @@ function MyItems() {
                   </div>
                   {/* }  */}
                 </div>
+
                 <div className="profile_follow de-flex">
+                  {weiValue !== undefined && (
+                    <div className="de-flex-col">
+                      <div className="profile_follower">
+                        Recent Income Stream:
+                      </div>
+                      <div className="profile_follower">
+                        {weiValue && ethers.utils.formatEther(weiValue)}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="de-flex-col">
                     <div className="profile_follower">500 followers</div>
                   </div>
+
                   <div className="de-flex-col">
                     <a href="#" className="btn-main">
                       Follow
@@ -244,6 +321,12 @@ function MyItems() {
                                           rented: nft.rented,
                                           expiryTime: nft.expiryTime,
                                           rentingDuration: nft.rentingDuration,
+                                          onemonthPrice: nft.onemonthPrice,
+                                          threemonthPrice: nft.threemonthPrice,
+                                          sixmonthPrice: nft.sixmonthPrice,
+                                          twelvemonthPrice:
+                                            nft.twelvemonthPrice,
+                                          purchased: nft.purchased,
                                           page: "myitems",
                                         },
                                       }}
@@ -273,11 +356,8 @@ function MyItems() {
                                           <h4>{nft.name}</h4>
 
                                           <div className="nft__item_price">
-                                            {web3.utils.fromWei(
-                                              nft.price.toString(),
-                                              "ether"
-                                            )}
-                                            {nft.token}
+                                            {nft.onemonthPrice}
+                                            USDC
                                             <span>1/20</span>
                                           </div>
 
@@ -334,6 +414,12 @@ function MyItems() {
                                           onRent: nft.onRent,
                                           rentingAmount: nft.rentingAmount,
                                           rentingDuration: nft.rentingDuration,
+                                          onemonthPrice: nft.onemonthPrice,
+                                          threemonthPrice: nft.threemonthPrice,
+                                          sixmonthPrice: nft.sixmonthPrice,
+                                          twelvemonthPrice:
+                                            nft.twelvemonthPrice,
+                                          purchased: nft.purchased,
                                           page: "myitems",
                                         },
                                       }}
@@ -363,11 +449,8 @@ function MyItems() {
                                           <h4>{nft.name}</h4>
 
                                           <div className="nft__item_price">
-                                            {web3.utils.fromWei(
-                                              nft.price.toString(),
-                                              "ether"
-                                            )}{" "}
-                                            {nft.token}
+                                            {nft.onemonthPrice}
+                                            USDC
                                             <span>1/20</span>
                                           </div>
 
@@ -424,6 +507,12 @@ function MyItems() {
                                           onRent: nft.onRent,
                                           rentingAmount: nft.rentingAmount,
                                           rentingDuration: nft.rentingDuration,
+                                          onemonthPrice: nft.onemonthPrice,
+                                          threemonthPrice: nft.threemonthPrice,
+                                          sixmonthPrice: nft.sixmonthPrice,
+                                          twelvemonthPrice:
+                                            nft.twelvemonthPrice,
+                                          purchased: nft.purchased,
                                           page: "myitems",
                                         },
                                       }}
@@ -453,11 +542,8 @@ function MyItems() {
                                           <h4>{nft.name}</h4>
 
                                           <div className="nft__item_price">
-                                            {web3.utils.fromWei(
-                                              nft.price.toString(),
-                                              "ether"
-                                            )}
-                                            {nft.token}
+                                            {nft.onemonthPrice}
+                                            USDC
                                             <span>1/20</span>
                                           </div>
 

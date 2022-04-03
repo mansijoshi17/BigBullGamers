@@ -22,16 +22,16 @@ function NftDetails({ router: { query } }) {
     withdrawNft,
     withdrawLoading,
   } = web3Context;
+  const [selected, setSelected] = useState(query?.onemonthPrice);
 
   useEffect(() => {
     if (query.seller !== undefined) {
       getCreatorData(query.seller);
     }
+    setSelected(query?.onemonthPrice);
     getNftDataByTokenId(query.tokenId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
-
-  console.log(query);
 
   return (
     <>
@@ -66,26 +66,36 @@ function NftDetails({ router: { query } }) {
                       </div>
                     </div>
                   </div>
-
+                  <div className="currentPrice">Current Price</div>
+                  <div className="form-group">
+                    <select
+                      className="form-control"
+                      id="exampleFormControlSelect1"
+                      value={selected}
+                      onChange={(e) => {
+                        setSelected(e.target.value);
+                      }}
+                    >
+                      <option selected value={query.onemonthPrice}>
+                        1 Month
+                      </option>
+                      <option value={query.threemonthPrice}>3 Month</option>
+                      <option value={query.sixmonthPrice}>6 Month</option>
+                      <option value={query.twelvemonthPrice}>12 Month</option>
+                    </select>
+                  </div>
                   <div className="de_tab tab_simple">
                     <div className="details-btn">
                       <div>
-                        <div className="currentPrice">Current Price</div>
                         <div className="price">
                           <img
-                            src={
-                              query.token == "MATIC"
-                                ? "/img/polygon-matic-logo.png"
-                                : query.token == "ETH"
-                                ? "/img/eth.png"
-                                : "/img/bnb.png"
-                            }
-                            height={"30px"}
-                            width={"30px"}
+                            src={"/img/usdc.png"}
+                            height={"40px"}
+                            width={"50px"}
                             alt="true"
                           />
                           <div style={{ marginLeft: "10px" }}>
-                            {query.price}
+                            {selected} USDC
                           </div>
                         </div>
                       </div>
@@ -131,7 +141,7 @@ function NftDetails({ router: { query } }) {
                       query.onRent === "false" ? (
                         <div
                           className="btn-main btn-lg"
-                          onClick={() => buyNft(query)}
+                          onClick={() => buyNft(query, parseInt(selected))}
                         >
                           {loader == true
                             ? "Loading...! Please wait it will take time"
@@ -178,6 +188,13 @@ function NftDetails({ router: { query } }) {
                       ) : (
                         ""
                       )}
+                      {query.page === "myitems" &&
+                        query.purchased === "true" &&
+                        query.uploaded === "false" && (
+                          <div className="btn-main btn-lg rent">
+                            Upload For Advertisment
+                          </div>
+                        )}
                     </div>
                     &nbsp;
                   </div>

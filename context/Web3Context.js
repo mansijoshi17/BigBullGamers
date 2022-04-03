@@ -32,11 +32,13 @@ import {
 } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { SuperfluidWeb3Context } from "./SuperfluidContext";
+import { useMoralis } from "react-moralis";
 
 import { db, auth, storage } from "../firebase/clientApp";
 export const Web3Context = createContext(undefined);
 
 export const Web3ContextProvider = (props) => {
+  const { Moralis } = useMoralis();
   const router = useRouter();
   const [nfts, setNfts] = useState([]);
   const [myNfts, setMyNfts] = useState([]);
@@ -61,7 +63,10 @@ export const Web3ContextProvider = (props) => {
   const [rentedNfts, setRentedNfts] = useState([]);
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const supweb3Context = React.useContext(SuperfluidWeb3Context);
-  const { createNewFlow, calculateFlowRate } = supweb3Context;
+  const { createNewFlow, calFlowRate } = supweb3Context;
+
+  const Gamevertisement = Moralis.Object.extend("Gamevertisement");
+  const gamevertisement = new Gamevertisement();
 
   useEffect(() => {
     let web3 = new Web3();
@@ -496,22 +501,41 @@ export const Web3ContextProvider = (props) => {
           signer
         );
 
-        let flowRate = await calculateFlowRate(price);
+        let flowRate = await calFlowRate(price);
         if (currentAddress) {
           try {
             await createNewFlow(nft.seller, flowRate);
+            const transaction = await contract.createMarketSale(
+              nftaddress,
+              nft.tokenId
+            );
+            const q = query(
+              collection(db, "BigBull"),
+              where("tokenId", "==", parseInt(nft.tokenId)),
+              where("chain", "==", nft.chain)
+            );
+
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach(async (e) => {
+              await updateDoc(doc(db, "BigBull", e.id), {
+                purchased: true,
+                buyer: currentAddress.toString(),
+              });
+            });
+            await transaction.wait();
+            loadNFTs();
+            loadMyNfts(networkId);
+            setLoader(false);
+            router.push("/my-items");
           } catch (error) {
-            toast.error("Stream is Already exiest! or not enough USDCx");
+            setLoader(false);
+            console.log(error);
+            alert("Stream is Already exist! or not enough USDCx");
           }
         } else {
           toast.info("Please connect wallet !");
           return;
         }
-
-        const transaction = await contract.createMarketSale(
-          nftaddress,
-          nft.tokenId
-        );
 
         // await updateDoc(updateData, {
         //   Bio: bio,
@@ -521,25 +545,6 @@ export const Web3ContextProvider = (props) => {
         //   WalletAddress: currentAddress,
         //   updatedAt: Timestamp.fromDate(new Date()).toDate(),
         // });
-
-        const q = query(
-          collection(db, "BigBull"),
-          where("tokenId", "==", parseInt(nft.tokenId)),
-          where("chain", "==", nft.chain)
-        );
-
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (e) => {
-          await updateDoc(doc(db, "BigBull", e.id), {
-            purchased: true,
-            buyer: currentAddress.toString(),
-          });
-        });
-        await transaction.wait();
-        loadNFTs();
-        loadMyNfts(networkId);
-        setLoader(false);
-        router.push("/my-items");
       } catch (error) {
         setLoader(false);
         alert(error.data?.message);
@@ -671,6 +676,32 @@ export const Web3ContextProvider = (props) => {
     }
   }
 
+  async function uploadforAdvertisement(nft) {
+    gamevertisement.set("description", nft.description);
+    gamevertisement.set("image", nft.image);
+    gamevertisement.set("name", nft.name);
+    gamevertisement.set("onemonthPrice", nft.onemonthPrice);
+    gamevertisement.set("seller", nft.seller);
+    gamevertisement.set("sixmonthPrice", nft.sixmonthPrice);
+    gamevertisement.set("threemonthPrice", nft.threemonthPrice);
+    gamevertisement.set("twelvemonthPrice", nft.twelvemonthPrice);
+    gamevertisement.set("tokenId", nft.tokenId);
+    gamevertisement.set("currentUser", currentAddress);
+    await gamevertisement.save();
+    const q = query(
+      collection(db, "BigBull"),
+      where("tokenId", "==", parseInt(nft.tokenId)),
+      where("chain", "==", nft.chain)
+    );
+
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (e) => {
+      await updateDoc(doc(db, "BigBull", e.id), {
+        uploaded: "true",
+      });
+    });
+  }
+
   return (
     <Web3Context.Provider
       value={{
@@ -710,6 +741,7 @@ export const Web3ContextProvider = (props) => {
         firebaseData,
         creator,
         nftDetails,
+        uploadforAdvertisement,
       }}
       {...props}
     >

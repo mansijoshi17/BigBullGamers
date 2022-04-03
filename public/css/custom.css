@@ -91,3 +91,11 @@ button#simple-tab-1,
 button#simple-tab-2 {
   color: #ffbd59 !important;
 }
+
+input#renting_price {
+  margin-bottom: "0px";
+}
+
+small#emailHelp {
+  font-weight: 800;
+}

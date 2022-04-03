@@ -224,6 +224,10 @@ function Explore() {
                               rentingDuration: nft.rentingDuration,
                               rented: nft.rented,
                               purchased: nft.purchased,
+                              onemonthPrice: nft.onemonthPrice,
+                              threemonthPrice: nft.threemonthPrice,
+                              sixmonthPrice: nft.sixmonthPrice,
+                              twelvemonthPrice: nft.twelvemonthPrice,
                               page: "explore",
                             },
                           }}
@@ -253,11 +257,8 @@ function Explore() {
                               <h4>{nft.name}</h4>
 
                               <div className="nft__item_price">
-                                {web3.utils.fromWei(
-                                  nft.price.toString(),
-                                  "ether"
-                                )}{" "}
-                                {nft.token}
+                                {nft.onemonthPrice}
+                                USDC
                                 <span>1/20</span>
                               </div>
                               {nft.purchased == true || nft.rented == true ? (
