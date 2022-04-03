@@ -152,12 +152,12 @@ function Create() {
   async function onChange(e) {
     const file = e.target.files[0];
     try {
-      // const metadata = await NFTclient.store({
-      //   name: file.name,
-      //   description: "NFT!",
-      //   image: new File([file], file.name, { type: "image/jpg" }),
-      // });
-      // console.log(metadata.url, "NFTStorage");
+      const metadata = await NFTclient.store({
+        name: file.name,
+        description: "NFT!",
+        image: new File([file], file.name, { type: "image/jpg" }),
+      });
+
       const metadataimg = {
         contentType: "image/jpeg",
       };
