@@ -21,6 +21,7 @@ function NftDetails({ router: { query } }) {
     rentLoading,
     withdrawNft,
     withdrawLoading,
+    uploadforAdvertisement,
   } = web3Context;
   const [selected, setSelected] = useState(query?.onemonthPrice);
 
@@ -191,7 +192,10 @@ function NftDetails({ router: { query } }) {
                       {query.page === "myitems" &&
                         query.purchased === "true" &&
                         query.uploaded === "false" && (
-                          <div className="btn-main btn-lg rent">
+                          <div
+                            className="btn-main btn-lg rent"
+                            onClick={() => uploadforAdvertisement(nft)}
+                          >
                             Upload For Advertisment
                           </div>
                         )}
