@@ -75,7 +75,6 @@ function MyItems() {
 
   useEffect(() => {
     console.log(currentAddress, "address");
-    listOutFlows();
 
     // window.ethereum.enable().then(function (accounts) {
     //   setCurrentAddress(accounts[0]);
@@ -102,57 +101,6 @@ function MyItems() {
     }
     setIsRefreshing(false);
   }, [userData, currentAddress]);
-
-  useEffect(() => {
-    if (flow !== undefined) {
-      const flowRateBigNumber =
-        flow && ethers.BigNumber.from(flow?.currentFlowRate);
-      if (flowRateBigNumber && flowRateBigNumber.isZero()) {
-        return; // No need to show animation when flow rate is zero.
-      }
-
-      const balanceBigNumber = ethers.BigNumber.from(
-        flow && flow?.streamedUntilUpdatedAt
-      );
-
-      let stopAnimation = false;
-      let lastAnimationTimestamp = 0;
-
-      const animationStep = (currentAnimationTimestamp) => {
-        if (stopAnimation) {
-          return;
-        }
-
-        if (
-          currentAnimationTimestamp - lastAnimationTimestamp >
-          ANIMATION_MINIMUM_STEP_TIME
-        ) {
-          const currentTimestampBigNumber = ethers.BigNumber.from(
-            new Date().valueOf() // Milliseconds elapsed since UTC epoch, disregards timezone.
-          );
-
-          setWeiValue(
-            balanceBigNumber.add(
-              currentTimestampBigNumber
-                .sub(balanceTimestampMs)
-                .mul(flowRateBigNumber)
-                .div(1000)
-            )
-          );
-
-          lastAnimationTimestamp = currentAnimationTimestamp;
-        }
-
-        window.requestAnimationFrame(animationStep);
-      };
-
-      window.requestAnimationFrame(animationStep);
-
-      return () => {
-        stopAnimation = true;
-      };
-    }
-  }, [flow]);
 
   const refreshData = () => {
     router.replace(router.asPath);
@@ -246,17 +194,6 @@ function MyItems() {
                 </div>
 
                 <div className="profile_follow de-flex">
-                  {weiValue !== undefined && (
-                    <div className="de-flex-col">
-                      <div className="profile_follower">
-                        Recent Income Stream:
-                      </div>
-                      <div className="profile_follower">
-                        {weiValue && ethers.utils.formatEther(weiValue)}
-                      </div>
-                    </div>
-                  )}
-
                   <div className="de-flex-col">
                     <div className="profile_follower">500 followers</div>
                   </div>

@@ -74,35 +74,35 @@ export const SuperfluidWeb3ContextProvider = (props) => {
     }
   }, [currentAddress]);
 
-  const queryData = networks.map((network) =>
-    sfSubgraph.useCustomQuery({
-      chainId: network.chainId,
-      document: searchByAddressDocument,
-      variables: {
-        addressId: currentAddress.toLowerCase(),
-        addressBytes: currentAddress.toLowerCase(),
-      },
-    })
-  );
-  console.log(queryData, "queryData");
+  // const queryData = networks.map((network) =>
+  //   sfSubgraph.useCustomQuery({
+  //     chainId: network.chainId,
+  //     document: searchByAddressDocument,
+  //     variables: {
+  //       addressId: currentAddress.toLowerCase(),
+  //       addressBytes: currentAddress.toLowerCase(),
+  //     },
+  //   })
+  // );
+  // console.log(queryData, "queryData");
 
-  const prefetchStreamsQuery = sfSubgraph.usePrefetch("streams");
+  // const prefetchStreamsQuery = sfSubgraph.usePrefetch("streams");
 
-  prefetchStreamsQuery({
-    chainId: networks[0].chainId,
-    filter: {
-      receiver: queryData[0].currentData?.accounts[0]?.id,
-    },
-  });
+  // prefetchStreamsQuery({
+  //   chainId: networks[0].chainId,
+  //   filter: {
+  //     receiver: queryData[0].currentData?.accounts[0]?.id,
+  //   },
+  // });
 
-  const incomingStreamsQuery = sfSubgraph.useStreamsQuery({
-    chainId: networks[0].chainId,
-    filter: {
-      receiver: currentAddress,
-    },
-  });
+  // const incomingStreamsQuery = sfSubgraph.useStreamsQuery({
+  //   chainId: networks[0].chainId,
+  //   filter: {
+  //     receiver: currentAddress,
+  //   },
+  // });
 
-  console.log(incomingStreamsQuery);
+  // console.log(incomingStreamsQuery);
 
   async function createNewFlow(recipient, flowRate) {
     const provider = new ethers.providers.Web3Provide(window?.ethereum);
@@ -148,20 +148,19 @@ export const SuperfluidWeb3ContextProvider = (props) => {
     }
   }
 
-  async function listOutFlows() {
-    setFlow(
-      incomingStreamsQuery.data?.data[
-        incomingStreamsQuery.data?.data.length - 1
-      ]
-    );
-  }
+  // async function listOutFlows() {
+  //   setFlow(
+  //     incomingStreamsQuery.data?.data[
+  //       incomingStreamsQuery.data?.data.length - 1
+  //     ]
+  //   );
+  // }
 
   return (
     <SuperfluidWeb3Context.Provider
       value={{
         createNewFlow,
         calFlowRate,
-        listOutFlows,
         isLoadingcon,
         totalStreams,
         flow,
