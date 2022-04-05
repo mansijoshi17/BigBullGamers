@@ -158,6 +158,8 @@ function Create() {
         image: new File([file], file.name, { type: "image/jpg" }),
       });
 
+      console.log(metadata, "metadata");
+
       const metadataimg = {
         contentType: "image/jpeg",
       };

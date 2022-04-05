@@ -42,7 +42,11 @@ function Header() {
                     style={{ cursor: "pointer" }}
                   >
                     <h1 className="logo" style={{ marginBottom: "0px" }}>
-                      <img src="/img/bigbullLogo.png" alt="logo" height={"100px"} />
+                      <img
+                        src="/img/bigbullLogo.png"
+                        alt="logo"
+                        height={"100px"}
+                      />
                     </h1>
                   </div>
                   {}
@@ -86,6 +90,7 @@ function Header() {
                       Feeds
                     </Link>
                   </li>
+
                   {/* <li id="profile">
                     <a href="profile.html">
                       Profile
@@ -93,7 +98,16 @@ function Header() {
                     </a>
                   </li> */}
                 </ul>
-
+                <a className="btn-main">
+                  <i className="icon_wallet_alt"></i>
+                  <a
+                    href="https://bigbullgamers.herokuapp.com/"
+                    target={"blank"}
+                    passHref
+                  >
+                    <span className="metaverse">Metaverse</span>
+                  </a>
+                </a>
                 {currentAddress === "" ||
                 currentAddress === "null" ||
                 currentAddress === null ||
